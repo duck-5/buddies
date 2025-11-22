@@ -52,7 +52,7 @@ def main():
     llm_client = GeminiClient(config={"api_key": API_KEY})
     
     # Simulate user message
-    user_message = "I ran out of milk"
+    user_message = "I ran out of milk. Also, wake me up in 1 hour."
     
     logger.info("Calling LLM...")
     llm_response = llm_client.call(system_prompt, user_message)

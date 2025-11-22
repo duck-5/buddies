@@ -8,7 +8,7 @@ import json
 import logging
 from typing import Any, Dict, Optional
 
-from agent.io.llm_client import LLMClient
+from agent.llm.llm_client import LLMClient
 
 logger = logging.getLogger("IO.MockLLMClient")
 

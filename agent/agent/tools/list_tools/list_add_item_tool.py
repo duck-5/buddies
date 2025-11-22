@@ -47,11 +47,11 @@ class ListAddTool(FileBasedListTool):
                 logger.warning(f"List '{item.list_name}' limit reached.")
                 return f"Error: List '{item.list_name}' is full."
 
-            current_list.append(item.item_name)
+            current_list.append(item.item)
             self._save_data(data)
             
-            logger.info(f"Persisted '{item.item_name}' to list '{item.list_name}'")
-            return f"Success: Added '{item.item_name}' to '{item.list_name}'."
+            logger.info(f"Persisted '{item.item}' to list '{item.list_name}'")
+            return f"Success: Added '{item.item}' to '{item.list_name}'."
 
         except Exception as e:
             logger.error(f"Error in add_to_list: {e}")

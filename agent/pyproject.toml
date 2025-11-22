@@ -9,7 +9,7 @@ description = "Agent package for AI Buddies"
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [ { name = "duck-5" } ]
-dependencies = ["tomli", "dacite"]
+dependencies = ["tomli", "dacite", "google-generativeai"]
 
 [tool.setuptools.packages.find]
 where = ["."]

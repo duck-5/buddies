@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 
 import google.generativeai as genai
 
-from agent.io.llm_client import LLMClient
+from agent.llm.llm_client import LLMClient
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("IO.GeminiClient")

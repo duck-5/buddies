@@ -30,15 +30,15 @@ class ListRemoveTool(FileBasedListTool):
             if item.list_name not in data:
                 return f"Error: List '{item.list_name}' does not exist."
 
-            if item.item_name in data[item.list_name]:
-                data[item.list_name].remove(item.item_name)
+            if item.item in data[item.list_name]:
+                data[item.list_name].remove(item.item)
                 self._save_data(data)
                 
                 if audit:
                     logger.info(f"[AUDIT] Removed '{item}' from '{item.list_name}'")
-                return f"Success: Removed '{item.item_name}'."
+                return f"Success: Removed '{item.item}'."
             
-            return f"Error: Item '{item.item_name}' not found."
+            return f"Error: Item '{item.item}' not found."
 
         except Exception as e:
             logger.error(f"Error in remove_from_list: {e}")
