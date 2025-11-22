@@ -44,7 +44,7 @@ class AgentFlow:
             try:
                 thought, response, results = self.parser.parse_and_execute(llm_response)
             except Exception as e:
-                user_input = f"There was an error processing the previous response: {str(e)}. Please try again."
+                user_input = f"There was an error processing the previous response: {str(e)}. Please provide the same message exactly, in the correct format"
                 continue
             
             # Step 5: Handle results
