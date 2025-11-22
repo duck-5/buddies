@@ -9,7 +9,7 @@ logger = logging.getLogger("Tools.GetEvents")
 
 @dataclass
 class GetEventsToolConfig:
-    event_files_path: str
+    events_file_path: str
 
 class GetEventsTool(Tool):
     NAME = "get_events"
