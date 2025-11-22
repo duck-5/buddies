@@ -14,7 +14,7 @@ class GetEventsToolConfig:
 
 class GetEventsTool(Tool):
     NAME = "get_events"
-    DESCRIPTION = "Retrieves events by date range."
+    DESCRIPTION = "Retrieves events by date range. To get today's events, provide today's date start_date and tomorrow's as end_date."
     INPUT_FORMAT = '{"start_date": "str (optional, format: YYYY-MM-DD)", "end_date": "str (optional, format: YYYY-MM-DD)"}'
 
     def __init__(self, config: GetEventsToolConfig) -> None:
