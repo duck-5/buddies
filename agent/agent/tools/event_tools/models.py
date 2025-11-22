@@ -6,3 +6,4 @@ class Event:
     notification: bool
     importance: int
     description: str
+    has_passed: bool = False

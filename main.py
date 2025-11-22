@@ -1,4 +1,4 @@
-from agent.agent.agent_system import Config, logger, AgentParser
+from agent.agent_system import Config, logger, AgentParser
 
 def main():
     try:
