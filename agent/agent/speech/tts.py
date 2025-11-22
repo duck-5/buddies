@@ -2,7 +2,7 @@ from piper import PiperVoice
 import sounddevice as sd
 import numpy as np
 import logging
-from config import ONNX_PATH
+from agent.config import ONNX_PATH
 
 logger = logging.getLogger(__name__)
 logging.basicConfig()
