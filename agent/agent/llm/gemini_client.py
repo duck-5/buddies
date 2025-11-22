@@ -81,16 +81,14 @@ class GeminiClient(LLMClient):
             logger.debug(f"User message: {user_message}")
             
             # Generate content
-            response = model.generate_content(user_message)
-            
-            # Extract text from response
-            response_text = response.text if response.text else ""
-            response_text = response_text[response_text.find('{'):-response_text[::-1].find('}')+1] 
+            response = model.generate_content(user_message)            
+            if not response.text:
+                raise RuntimeError("No response from gemini")
 
-            logger.debug(f"Received response from Gemini (length: {len(response_text)} characters)")
-            logger.debug(f"Full Gemini response: {response_text}")
+            logger.debug(f"Received response from Gemini (length: {len(response.text)} characters)")
+            logger.debug(f"Full Gemini response: {response.text}")
             
-            return response_text
+            return response.text
             
         except Exception as e:
             logger.error(f"Error calling Gemini API: {e}")

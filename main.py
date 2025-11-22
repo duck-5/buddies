@@ -1,7 +1,6 @@
 import logging
-import logging.config
 from agent.agent_system import Config, AgentParser
-from agent.io import GeminiClient
+from agent.llm import GeminiClient
 
 logger = logging.getLogger(__name__)
 
