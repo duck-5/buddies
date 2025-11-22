@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 import json
-import os
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from agent.tools.list_tools.file_based_list_tool import FileBasedListTool, FileBasedListToolConfig
 logger = logging.getLogger("Tools.ListRemoveItem")
