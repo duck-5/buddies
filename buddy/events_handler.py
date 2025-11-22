@@ -4,7 +4,7 @@ from datetime import datetime
 from dataclasses import asdict
 
 from agent.agent.flow import AgentFlow
-from agent.agent_config import EVENTS_FILE_PATH
+from agent.config import EVENTS_FILE_PATH
 from agent.tools.event_tools.models import Event
 
 def check_and_alert_events(agent_flow: AgentFlow):
