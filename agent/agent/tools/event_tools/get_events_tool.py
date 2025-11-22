@@ -18,12 +18,12 @@ class GetEventsTool(Tool):
 
     def __init__(self, config: GetEventsToolConfig) -> None:
         super().__init__(config)
-        self.event_files_path = config.event_files_path
+        self.events_file_path = config.events_file_path
 
     def _load_data(self) -> List[Dict[str, Any]]:
         """Load events from the file."""
         try:
-            with open(self.event_files_path, "r") as file:
+            with open(self.events_file_path, "r") as file:
                 return json.load(file)
         except FileNotFoundError:
             return []
