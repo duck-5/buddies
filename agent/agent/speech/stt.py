@@ -1,17 +1,11 @@
 import os
-import queue
 import json
-import time  # Added for timing
+import time
 import pyaudio
 from vosk import Model, KaldiRecognizer
 
 class SpeechToText:
     def __init__(self, model_path="model", device_index=None, silence_limit=2.0):
-        """
-        Args:
-            silence_limit (float): Seconds of silence to wait before yielding 
-                                   the sentence. Higher = better for slow speakers.
-        """
         self.model_path = model_path
         self.device_index = device_index
         self.silence_limit = silence_limit
@@ -25,9 +19,11 @@ class SpeechToText:
         self.model = Model(self.model_path)
         self.recognizer = KaldiRecognizer(self.model, self.rate)
 
-    def listen(self):
+    def listen_once(self) -> str:
         """
-        Yields text only after the user has stopped speaking for 'silence_limit' seconds.
+        Listens for a single sentence. 
+        Blocks execution until speech is detected and finished.
+        Returns the string and cleans up the audio stream immediately.
         """
         p = pyaudio.PyAudio()
         stream = p.open(format=pyaudio.paInt16,
@@ -37,10 +33,9 @@ class SpeechToText:
                         frames_per_buffer=self.chunk,
                         input_device_index=self.device_index)
         
-        print(f"Listening... (Waiting for {self.silence_limit}s silence to finalize)")
+        print(f"Listening... (Waiting for input + {self.silence_limit}s silence)")
         stream.start_stream()
 
-        # --- Buffer Logic State ---
         text_buffer = []
         last_speech_time = time.time()
         
@@ -49,44 +44,31 @@ class SpeechToText:
                 data = stream.read(self.chunk, exception_on_overflow=False)
                 current_time = time.time()
 
-                # 1. Check for "Official" Sentence End (Vosk Logic)
+                # 1. Check for "Official" Sentence End
                 if self.recognizer.AcceptWaveform(data):
                     result = json.loads(self.recognizer.Result())
                     text = result.get('text', '')
-                    
                     if text:
                         text_buffer.append(text)
-                        last_speech_time = current_time # Reset timer
+                        last_speech_time = current_time
                 
-                # 2. Check for "Ongoing" Speech (Partial Logic)
+                # 2. Check for "Ongoing" Speech (Reset timer if user is mid-sentence)
                 else:
                     partial = json.loads(self.recognizer.PartialResult())
                     if partial.get('partial', ''):
-                        # User is currently speaking (mid-sentence)
-                        last_speech_time = current_time # Reset timer
+                        last_speech_time = current_time
 
-                # 3. The "Timeout" Decision Logic
-                # If we have text in buffer AND we haven't heard speech for X seconds
-                time_since_speech = current_time - last_speech_time
-                
-                if text_buffer and (time_since_speech > self.silence_limit):
-                    # Join all buffered segments into one clean sentence
+                # 3. Return Trigger
+                # Only return if we have captured text AND the silence limit has passed
+                if text_buffer and (current_time - last_speech_time > self.silence_limit):
                     full_sentence = " ".join(text_buffer)
-                    yield full_sentence
-                    
-                    # Reset state
-                    text_buffer = []
+                    return full_sentence  # <--- Returns string and exits loop
                     
         except KeyboardInterrupt:
-            pass
+            return ""
         finally:
+            # This block runs immediately after 'return'
+            print("Stopping listener...")
             stream.stop_stream()
             stream.close()
             p.terminate()
-
-if __name__ == "__main__":
-    # Set silence_limit to 2.0 or 3.0 for slow speaking
-    stt = SpeechToText(model_path="model", silence_limit=2.0)
-    
-    for sentence in stt.listen():
-        print(f"Finalized Sentence: {sentence}")

@@ -13,8 +13,7 @@ class AgentFlow:
         self.parser = parser
         self.llm_client = llm_client
         self.notes: List[str] = []
-        stt = SpeechToText(model_path=VOSK_MODEL_PATH)
-        self.listener = stt.listen()
+        self.stt = SpeechToText(model_path=VOSK_MODEL_PATH)
 
     def add_note(self, note: str):
         """Add a special note to the list of notes."""
@@ -24,7 +23,7 @@ class AgentFlow:
         """Main flow of the system."""
         while True:
             # Step 1: Get user input
-            user_input = self.listener.__next__()
+            user_input = self.stt.listen_once()
             print("----> Input:", user_input)
             self.basic_flow(user_input)
     
