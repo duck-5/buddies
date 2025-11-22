@@ -14,8 +14,8 @@ class GetEventsToolConfig:
 
 class GetEventsTool(Tool):
     NAME = "get_events"
-    DESCRIPTION = "Retrieves events by title or date range."
-    INPUT_FORMAT = '{"title": "str (optional)", "start_date": "str (optional, format: YYYY-MM-DD)", "end_date": "str (optional, format: YYYY-MM-DD)"}'
+    DESCRIPTION = "Retrieves events by date range."
+    INPUT_FORMAT = '{"start_date": "str (optional, format: YYYY-MM-DD)", "end_date": "str (optional, format: YYYY-MM-DD)"}'
 
     def __init__(self, config: GetEventsToolConfig) -> None:
         super().__init__(config)
@@ -36,16 +36,12 @@ class GetEventsTool(Tool):
         try:
             # Parse the input arguments
             args = json.loads(arguments_json)
-            title: Optional[str] = args.get("title")
             start_date: Optional[str] = args.get("start_date")
             end_date: Optional[str] = args.get("end_date")
 
             # Load the events data
             data = self._load_data()
-
-            # Filter events by title if provided
-            if title:
-                data = [Event(**event) for event in data if title.lower() in event["title"].lower()]
+            data = [Event(**event) for event in data]
 
             # Filter events by date range if provided
             if start_date:
