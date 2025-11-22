@@ -47,7 +47,6 @@ class ToolCall:
   arguments: Dict[str, Any]  
 
 CURRENT_DATETIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-CONVERSASION_END_PHRASE = "<END>"
 SYSTEM_PROMPT_PREFIX = f"""You are an AI agent made for helping adults.
 Your user name is {USER_NAME}, age is {USER_AGE}, and lives in {USER_CITY}.
 The current date and time is {CURRENT_DATETIME}.
@@ -65,6 +64,7 @@ RESPONSE_FORMAT = """RESPONSE FORMAT:
 {{
   "thought": "Your reasoning process here",
   "response": "Text response to the user (optional if using tools)",
+  "end": if this field is present with value 1, the conversation will be ended.
   "tool_calls": [
     {{
       "tool_name": "name_of_tool",
@@ -72,7 +72,7 @@ RESPONSE_FORMAT = """RESPONSE FORMAT:
     }}
   ]
 }}
-""" + f"""3.To end the conversation, the full reply should be: "{CONVERSASION_END_PHRASE}" """
+"""
 
 
 

@@ -43,12 +43,10 @@ class AgentFlow:
             system_prompt = self.parser.get_system_prompt()
             llm_response = self.llm_client.call(system_prompt, user_input)
 
-            if llm_response == "<END>":
-                return False
             print("========\n", llm_response, "\n========")
             # Step 4: Parse and execute LLM output
             try:
-                thought, response, results = self.parser.parse_and_execute(llm_response)
+                thought, response, should_end, results = self.parser.parse_and_execute(llm_response)
             except Exception as e:
                 user_input = f"There was an error processing the previous response: {str(e)}. Please provide the same message exactly, in the correct format"
                 continue
@@ -62,6 +60,8 @@ class AgentFlow:
             elif response:
                 # Call output function if no tools were invoked
                 self.call_output_function(response)
+                if should_end:
+                    return False
                 return True
 
     def call_output_function(self, output_text: str):
