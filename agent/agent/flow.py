@@ -47,7 +47,7 @@ class AgentFlow:
             if results:
                 self.notes += "Tools were invoked. The output hasn't passed to the user. Make sure that all tools were invoked properly, and then the output will be returned to the user."
                 self.return_results_to_llm(results)
-            else:
+            elif response:
                 # Call output function if no tools were invoked
                 print("========\n", llm_response, "\n========")
                 self.call_output_function(response)

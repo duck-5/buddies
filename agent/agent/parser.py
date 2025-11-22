@@ -78,6 +78,7 @@ class AgentParser:
         results = []
         if "thought" in data:
             logger.info(f"[AI Thought]: {data['thought']}")
+        
         if "response" in data:
             logger.info(f"[AI Message]: {data['response']}")
 
@@ -101,4 +102,4 @@ class AgentParser:
                 results.append({"tool": tool_name, "status": "error", "output": err_msg})
                 logger.error(err_msg)
 
-        return data["thought"], data["response"], results
+        return data.get("thought", ""), data.get("response", ""), results
