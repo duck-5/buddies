@@ -3,7 +3,7 @@ from agent.tools.list_tools.list_add_item_tool import ListAddTool, ListAddToolCo
 from agent.tools.list_tools.list_remove_item_tool import ListRemoveTool, ListRemoveToolConfig
 from agent.tools.event_tools.add_event_tool import AddEventTool, AddEventToolConfig
 from agent.tools.event_tools.remove_event_tool import RemoveEventTool, RemoveEventToolConfig
-from agent.agent_config import LISTS_FILE_PATH, EVENTS_FILE_PATH
+from agent.agent.config import LISTS_FILE_PATH, EVENTS_FILE_PATH
 
 AVAILABLE_TOOLS = [ListAddTool, ListRemoveTool, AddEventTool, RemoveEventTool]
 
