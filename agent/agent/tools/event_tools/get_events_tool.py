@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from datetime import datetime
 from agent.tools.tool_interface import Tool
 from dataclasses import dataclass
+from .models import Event
 
 logger = logging.getLogger("Tools.GetEvents")
 
@@ -44,16 +45,16 @@ class GetEventsTool(Tool):
 
             # Filter events by title if provided
             if title:
-                data = [event for event in data if title.lower() in event["title"].lower()]
+                data = [Event(**event) for event in data if title.lower() in event["title"].lower()]
 
             # Filter events by date range if provided
             if start_date:
                 start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-                data = [event for event in data if datetime.strptime(event["date"], "%Y-%m-%d") >= start_date_obj]
+                data = [event for event in data if datetime.fromisoformat(event.time) >= start_date_obj]
 
             if end_date:
                 end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-                data = [event for event in data if datetime.strptime(event["date"], "%Y-%m-%d") <= end_date_obj]
+                data = [event for event in data if datetime.fromisoformat(event.time) <= end_date_obj]
 
             logger.info("Retrieved events based on the provided criteria.")
             return data
