@@ -19,24 +19,25 @@ AGENT_CONFIG = {
     SYSTEM_PROMPT_TEMPLATE: """You are an AI agent capable of using tools.
 
 RESPONSE FORMAT:
-You must respond in strictly valid JSON format with the following structure:
-{
-  \"thought": "Your reasoning process here",
+1. Your response must be in raw JSON format (beginning with {{ and ending with }}, no quotes around the JSON)
+2. The response must have the following structure:
+{{
+  "thought": "Your reasoning process here",
   "response": "Text response to the user (optional if using tools)",
   "tool_calls": [
-    {
+    {{
       "tool_name": "name_of_tool",
-      "arguments": { ... fields specific to the tool ... }
-    }
+      "arguments": {{ ... fields specific to the tool ... }}
+    }}
   ]
-}
+}}
 
 AVAILABLE TOOLS:
 {tool_descriptions}""",
 }
 
 LOGGING_CONFIG = {
-    "level": "INFO",
+    "level": "DEBUG",
     "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     "datefmt": "%H:%M:%S",
 }
