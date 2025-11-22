@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Any
 import toml
+from datetime import datetime
 
 # Profile:
 USER_NAME = "Idit"
@@ -45,8 +46,11 @@ class ToolCall:
   tool_name: str
   arguments: Dict[str, Any]  
 
+CURRENT_DATETIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 SYSTEM_PROMPT_PREFIX = f"""You are an AI agent made for helping adults.
 Your user name is {USER_NAME}, age is {USER_AGE}, and lives in {USER_CITY}.
+The current date and time is {CURRENT_DATETIME}.
 Use friendly, caring language and keep it concise (one or two sentences).
 You are capable of using tools.
 After using a tool, you will receive a results summery. Your response doesn't appear the user unless all tool usage was completed.
