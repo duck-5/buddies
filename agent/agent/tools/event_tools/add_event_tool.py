@@ -25,21 +25,21 @@ class AddEventTool(Tool):
             try:
                 event = from_dict(data_class=Event, data=args, config=Config(type_hooks={int:int, str:str}))
             except Exception as e:
-                return f"Error: Can't parse arguments - {e}"
+                raise f"Error: Can't parse arguments - {e}"
             
             event.time = self._parse_time(event.time)
             
             if not (1 <= event.importance <= 5):
-                return "Error: 'importance' must be between 1 and 5."
+                raise "Error: 'importance' must be between 1 and 5."
             
 
             # Save event to file
             self._save_event(event)
 
-            return {"status": "success", "event": event}
+            return {"status": "success", "event": asdict(event)}
 
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            raise e
 
     def _save_event(self, event: Event) -> None:
         file_path = self.config.event_files_path

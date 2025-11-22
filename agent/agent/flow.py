@@ -20,7 +20,10 @@ class AgentFlow:
         while True:
             # Step 1: Get user input
             user_input = input("Enter your input: ")
-
+            self.basic_flow(user_input)
+    
+    def basic_flow(self, user_input: str):
+        while True:
             # Step 2: Add notes from the list
             if self.notes:
                 notes_text = "\n".join(f"[NOTE]: {note}" for note in self.notes)
@@ -36,6 +39,7 @@ class AgentFlow:
 
             # Step 5: Handle results
             if results:
+                self.notes += "Tools were invoked. The output hasn't passed to the user. Make sure that all tools were invoked properly, and then the output will be returned to the user."
                 self.return_results_to_llm(results)
             else:
                 # Call output function if no tools were invoked
@@ -43,10 +47,20 @@ class AgentFlow:
                 print(parsed_output)
                 output_text = parsed_output.get("response", "")
                 self.call_output_function(output_text)
+                return
 
     def return_results_to_llm(self, results: List[Dict[str, Any]]):
-        """Simulates returning tool results to the LLM."""
-        print("Returning results to LLM:", results)
+        """Send tool execution results back to the LLM."""
+        try:
+            # Format the results as a JSON string
+            results_json = json.dumps({"tool_results": results}, indent=2)
+            print("Returning results to LLM:")
+            print(results_json)
+
+            # Optionally, you can send the results back to the LLM client if needed
+            # self.llm_client.send_results(results_json)
+        except Exception as e:
+            self.llm_client.logger.error(f"Failed to return results to LLM: {e}")
 
     def call_output_function(self, output_text: str):
         """Simulates calling an output function with the LLM's text."""
