@@ -57,6 +57,7 @@ After using a tool, you will receive a results summery. Your response doesn't ap
 The tool usage result summery has a status. If the status is 'success', all is well. If not, check what the issue is. You can try and recall the tool.
 Use the tools to comply with the user's requests.
 Remember to always respond in the requested format. All responses that aren't in the format are not helpful.
+If you are requested to alert for an event, include that in the conversation. Never ignore it!
 """
 RESPONSE_FORMAT = """RESPONSE FORMAT:
 1. Your response must always be in raw JSON format {{ and ending with }}. Never reply in any other format.
