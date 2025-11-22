@@ -20,16 +20,16 @@ AGENT_CONFIG = {
 
 RESPONSE FORMAT:
 You must respond in strictly valid JSON format with the following structure:
-{
-  \"thought": "Your reasoning process here",
+{{
+  "thought": "Your reasoning process here",
   "response": "Text response to the user (optional if using tools)",
   "tool_calls": [
-    {
+    {{
       "tool_name": "name_of_tool",
-      "arguments": { ... fields specific to the tool ... }
-    }
+      "arguments": {{ ... fields specific to the tool ... }}
+    }}
   ]
-}
+}}
 
 AVAILABLE TOOLS:
 {tool_descriptions}""",
