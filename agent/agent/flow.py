@@ -4,6 +4,7 @@ from agent.parser import AgentParser, Config
 from agent.config import GOOGLE_API_KEY
 from agent.llm.gemini_client import GeminiClient, GeminiConfig
 from agent.speech.stt import SpeechToText
+from agent.speech import tts
 class AgentFlow:
     """Main flow of the system encapsulated in a class."""
 
@@ -23,6 +24,7 @@ class AgentFlow:
         while True:
             # Step 1: Get user input
             user_input = self.listener.__next__()
+            print("----> Input:", user_input)
             self.basic_flow(user_input)
     
     def basic_flow(self, user_input: str):
@@ -67,6 +69,7 @@ class AgentFlow:
 
     def call_output_function(self, output_text: str):
         """Simulates calling an output function with the LLM's text."""
+        tts.talk(output_text)
         print("Output:", output_text)
 
 if __name__ == "__main__":
