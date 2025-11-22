@@ -1,5 +1,5 @@
 from agent.agent.parser import AgentParser, Config
-from agent.agent.config import GOOGLE_API_KEY, VOSK_MODEL_PATH
+from agent.agent.config import GOOGLE_API_KEY,HEY_BUDDY_VOSK_MODEL_PATH 
 from agent.agent.flow import AgentFlow
 from agent.agent.llm.gemini_client import GeminiClient, GeminiConfig
 from threading import Thread
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     
     llm_client = GeminiClient(gemini_config)
 
-    engine = WakeWordEngine(model_path=VOSK_MODEL_PATH, wake_phrase="hey buddy")
+    engine = WakeWordEngine(model_path=HEY_BUDDY_VOSK_MODEL_PATH, wake_phrase="hey buddy")
     
     # Create and run the agent flow
     agent_flow = AgentFlow(parser, llm_client)
