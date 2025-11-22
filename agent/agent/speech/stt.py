@@ -5,7 +5,7 @@ import pyaudio
 from vosk import Model, KaldiRecognizer
 
 class SpeechToText:
-    def __init__(self, model_path="model", device_index=None, silence_limit=2.0):
+    def __init__(self, model_path, device_index=None, silence_limit=0.3):
         self.model_path = model_path
         self.device_index = device_index
         self.silence_limit = silence_limit

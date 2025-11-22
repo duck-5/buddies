@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, List
 from agent.parser import AgentParser, Config
-from agent.config import GOOGLE_API_KEY, VOSK_MODEL_PATH
+from agent.config import GOOGLE_API_KEY, MAIN_STT_VOSK_MODEL_PATH
 from agent.llm.gemini_client import GeminiClient, GeminiConfig
 from agent.speech.stt import SpeechToText
 from agent.speech import tts
@@ -13,7 +13,7 @@ class AgentFlow:
         self.parser = parser
         self.llm_client = llm_client
         self.notes: List[str] = []
-        self.stt = SpeechToText(model_path=VOSK_MODEL_PATH)
+        self.stt = SpeechToText(model_path=MAIN_STT_VOSK_MODEL_PATH)
         self.is_running: bool = False
 
     def add_note(self, note: str):
