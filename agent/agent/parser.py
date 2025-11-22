@@ -68,7 +68,6 @@ class AgentParser:
         )
 
     def parse_and_execute(self, llm_response: str) -> List[Dict[str, Any]]:
-
         try:
             data = utils.parse_llm_response(llm_response)
         except ValueError:
@@ -102,4 +101,4 @@ class AgentParser:
                 results.append({"tool": tool_name, "status": "error", "output": err_msg})
                 logger.error(err_msg)
 
-        return results
+        return data["thought"], data["response"], results

@@ -41,7 +41,7 @@ class AgentFlow:
             llm_response = self.llm_client.call(system_prompt, user_input)
 
             # Step 4: Parse and execute LLM output
-            results = self.parser.parse_and_execute(llm_response)
+            thought, response, results = self.parser.parse_and_execute(llm_response)
 
             # Step 5: Handle results
             if results:
@@ -50,9 +50,7 @@ class AgentFlow:
             else:
                 # Call output function if no tools were invoked
                 print("========\n", llm_response, "\n========")
-                parsed_output = json.loads(llm_response)
-                output_text = parsed_output.get("response", "")
-                self.call_output_function(output_text)
+                self.call_output_function(response)
                 return
 
     def return_results_to_llm(self, results: List[Dict[str, Any]]):
