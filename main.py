@@ -1,4 +1,5 @@
 from agent.agent_system import Config, logger, AgentParser
+from agent.io import MockLLMClient
 
 def main():
     try:
@@ -12,9 +13,9 @@ def main():
     parser = AgentParser(config)
     
     logger.info("System initialized. Generating system prompt...")
-    # print(parser.get_system_prompt()) # Uncomment to see prompt
+    system_prompt = parser.get_system_prompt()
 
-    # Simulate LLM output
+    # Initialize mock LLM client with the existing mock response
     mock_response = """
     {
         "thought": "Adding milk using defaults.",
@@ -29,9 +30,16 @@ def main():
         ]
     }
     """
+    llm_client = MockLLMClient(config={"response": mock_response.strip()})
     
-    logger.info("Simulating LLM Response processing...")
-    results = parser.parse_and_execute(mock_response)
+    # Simulate user message
+    user_message = "Add milk to my groceries list"
+    
+    logger.info("Calling LLM...")
+    llm_response = llm_client.call(system_prompt, user_message)
+    
+    logger.info("Processing LLM response...")
+    results = parser.parse_and_execute(llm_response)
     
     logger.info("Execution Results:")
     for res in results:
