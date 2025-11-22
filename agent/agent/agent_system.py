@@ -2,6 +2,7 @@ import json
 from dataclasses import asdict
 import logging
 from typing import Any, Dict, List
+from agent.utils import utils
 from agent.tools.tool_interface import Tool
 from agent.tools import AVAILABLE_TOOLS, TOOLS_CONFIG
 from agent.agent_config import LoggingConfig, ErrorMessages, ResponseTemplate
@@ -67,42 +68,38 @@ class AgentParser:
         )
 
     def parse_and_execute(self, llm_response: str) -> List[Dict[str, Any]]:
-        results = []
-        
-        # Removed markdown stripping logic as requested; assumes raw JSON input.
-        cleaned_resp = llm_response.strip()
 
         try:
-            data = json.loads(cleaned_resp)
-            
-            if "thought" in data:
-                logger.info(f"[AI Thought]: {data['thought']}")
-            if "response" in data:
-                logger.info(f"[AI Message]: {data['response']}")
+            data = utils.parse_llm_response(llm_response)
+        except ValueError:
+            logger.error("Could not parse LLM response")
+            logger.debug(f"Full response: {llm_response}")
+            return []
 
-            tool_calls = data.get("tool_calls", [])
-            
-            for call in tool_calls:
-                tool_name = call.get("tool_name")
-                args_dict = call.get("arguments", {})
-                args_str = json.dumps(args_dict)
-                if tool_name in self.tools:
-                    logger.info(f"Invoking tool: {tool_name}")
-                    try:
-                        output = self.tools[tool_name].execute(args_str)
-                        results.append({"tool": tool_name, "status": "success", "output": output})
-                        logger.info(f"Tool '{tool_name}' execution successful.")
-                    except Exception as e:
-                        err_msg = self.config.get_error("execution_error", tool_name=tool_name, error=str(e))
-                        results.append({"tool": tool_name, "status": "error", "output": err_msg})
-                        logger.error(f"Tool execution failed: {err_msg}")
-                else:
-                    err_msg = self.config.get_error("tool_not_found", tool_name=tool_name)
+        results = []
+        if "thought" in data:
+            logger.info(f"[AI Thought]: {data['thought']}")
+        if "response" in data:
+            logger.info(f"[AI Message]: {data['response']}")
+
+        tool_calls = data.get("tool_calls", [])
+        for call in tool_calls:
+            tool_name = call.get("tool_name")
+            args_dict = call.get("arguments", {})
+            args_str = json.dumps(args_dict)
+            if tool_name in self.tools:
+                logger.info(f"Invoking tool: {tool_name}")
+                try:
+                    output = self.tools[tool_name].execute(args_str)
+                    results.append({"tool": tool_name, "status": "success", "output": output})
+                    logger.info(f"Tool '{tool_name}' execution successful.")
+                except Exception as e:
+                    err_msg = self.config.get_error("execution_error", tool_name=tool_name, error=str(e))
                     results.append({"tool": tool_name, "status": "error", "output": err_msg})
-                    logger.error(err_msg)
+                    logger.error(f"Tool execution failed: {err_msg}")
+            else:
+                err_msg = self.config.get_error("tool_not_found", tool_name=tool_name)
+                results.append({"tool": tool_name, "status": "error", "output": err_msg})
+                logger.error(err_msg)
 
-        except json.JSONDecodeError as e:
-            error_text = self.config.get_error("json_parse", error=str(e))
-            logger.error(error_text)
-            
         return results

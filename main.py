@@ -1,4 +1,12 @@
+
 from agent.agent_system import Config, logger, AgentParser
+
+import logging
+from agent.agent_system import Config, AgentParser
+from agent.llm import GeminiClient
+
+logger = logging.getLogger(__name__)
+
 
 def main():
     try:
@@ -10,7 +18,9 @@ def main():
     parser = AgentParser(config)
     
     logger.info("System initialized. Generating system prompt...")
-    # print(parser.get_system_prompt()) # Uncomment to see prompt
+    system_prompt = parser.get_system_prompt()
+
+
 
     # Simulate LLM output
     mock_response = """
@@ -37,9 +47,18 @@ def main():
         ]
     }
     """
+
+    API_KEY = "AIzaSyBMNdN7CRw619o7HKHJ-xlFcmREskGhbkk"
+    llm_client = GeminiClient(config={"api_key": API_KEY})
     
-    logger.info("Simulating LLM Response processing...")
-    results = parser.parse_and_execute(mock_response)
+    # Simulate user message
+    user_message = "I ran out of milk"
+    
+    logger.info("Calling LLM...")
+    llm_response = llm_client.call(system_prompt, user_message)
+    
+    logger.info("Processing LLM response...")
+    results = parser.parse_and_execute(llm_response)
     
     logger.info("Execution Results:")
     for res in results:
