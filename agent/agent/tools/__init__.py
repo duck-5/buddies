@@ -1,8 +1,8 @@
 from __future__ import annotations
 from agent.tools.list_tools.list_add_item_tool import ListAddTool, ListAddToolConfig
 from agent.tools.list_tools.list_remove_item_tool import ListRemoveTool, ListRemoveToolConfig
-from agent.agent.tools.event_tools.add_event_tool import AddEventTool, AddEventToolConfig
-from agent.agent.tools.event_tools.remove_event_tool import RemoveEventTool, RemoveEventToolConfig
+from agent.tools.event_tools.add_event_tool import AddEventTool, AddEventToolConfig
+from agent.tools.event_tools.remove_event_tool import RemoveEventTool, RemoveEventToolConfig
 from agent.agent_config import LISTS_FILE_PATH, EVENTS_FILE_PATH
 
 AVAILABLE_TOOLS = [ListAddTool, ListRemoveTool, AddEventTool, RemoveEventTool]

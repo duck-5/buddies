@@ -1,9 +1,11 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+from dacite import from_dict, Config
 import json
 from datetime import datetime, timedelta
 import os
 from typing import Any, Dict
 from agent.tools.tool_interface import Tool
+from agent.tools.event_tools.models import Event
 
 @dataclass
 class AddEventToolConfig:
@@ -20,36 +22,16 @@ class AddEventTool(Tool):
     def execute(self, arguments_json: str) -> Any:
         try:
             args = json.loads(arguments_json)
-
-            # Parse time field
-            time_input = args.get("time")
-            event_time = self._parse_time(time_input)
-
-            # Extract other fields
-            notification = args.get("notification", False)
-            importance = args.get("importance", 1)
-            description = args.get("description", "")
-
-            if not description:
-                return "Error: 'description' is required."
-
-            # Validate importance
-            if not importance.isnumeric():
-                return "Error: 'importance' must be a number."
+            try:
+                event = from_dict(data_class=Event, data=args, config=Config(type_hooks={int:int, str:str}))
+            except Exception as e:
+                return f"Error: Can't parse arguments - {e}"
             
-            importance = int(importance)
+            event.time = self._parse_time(event.time)
             
-            if not (1 <= importance <= 5):
+            if not (1 <= event.importance <= 5):
                 return "Error: 'importance' must be between 1 and 5."
             
-
-            # Create event
-            event = {
-                "time": event_time,
-                "notification": notification,
-                "importance": importance,
-                "description": description,
-            }
 
             # Save event to file
             self._save_event(event)
@@ -59,7 +41,7 @@ class AddEventTool(Tool):
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def _save_event(self, event: Dict[str, Any]) -> None:
+    def _save_event(self, event: Event) -> None:
         file_path = self.config.event_files_path
         events = []
 
@@ -72,7 +54,7 @@ class AddEventTool(Tool):
                     pass
 
         # Append the new event
-        events.append(event)
+        events.append(asdict(event))
 
         # Save back to the file
         with open(file_path, "w") as f:

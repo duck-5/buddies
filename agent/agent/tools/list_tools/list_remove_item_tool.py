@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import json
 import logging
 from typing import Any
-
+from agent.tools.list_tools.models import ListItem
 from agent.tools.list_tools.file_based_list_tool import FileBasedListTool, FileBasedListToolConfig
 logger = logging.getLogger("Tools.ListRemoveItem")
 
@@ -21,25 +21,24 @@ class ListRemoveTool(FileBasedListTool):
     def execute(self, arguments_json: str) -> Any:
         try:
             args = json.loads(arguments_json)
-            item = args.get("item")
-            list_name = args.get("list_name")
+            item = ListItem(**args)
             
             audit = self.config.allow_audit_logging
 
             data = self._load_data()
 
-            if list_name not in data:
-                return f"Error: List '{list_name}' does not exist."
+            if item.list_name not in data:
+                return f"Error: List '{item.list_name}' does not exist."
 
-            if item in data[list_name]:
-                data[list_name].remove(item)
+            if item.item_name in data[item.list_name]:
+                data[item.list_name].remove(item.item_name)
                 self._save_data(data)
                 
                 if audit:
-                    logger.info(f"[AUDIT] Removed '{item}' from '{list_name}'")
-                return f"Success: Removed '{item}'."
+                    logger.info(f"[AUDIT] Removed '{item}' from '{item.list_name}'")
+                return f"Success: Removed '{item.item_name}'."
             
-            return f"Error: Item '{item}' not found."
+            return f"Error: Item '{item.item_name}' not found."
 
         except Exception as e:
             logger.error(f"Error in remove_from_list: {e}")
