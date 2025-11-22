@@ -22,13 +22,13 @@ class AgentFlow:
 
     def main_flow(self):
         self.is_running = True
-        """Main flow of the system."""
         should_continue = True
+        
         while should_continue:
-            # Step 1: Get user input
             user_input = self.stt.listen_once()
             print("----> Input:", user_input)
             should_continue = self.basic_flow(user_input)
+
         self.is_running = False
     
     def basic_flow(self, user_input: str):
@@ -43,6 +43,8 @@ class AgentFlow:
             system_prompt = self.parser.get_system_prompt()
             llm_response = self.llm_client.call(system_prompt, user_input)
 
+            if response == "<END>":
+                return False
             print("========\n", llm_response, "\n========")
             # Step 4: Parse and execute LLM output
             try:
@@ -58,8 +60,6 @@ class AgentFlow:
                 
                 print("********\n", user_input, "\n********")
             elif response:
-                if response == "<END>":
-                    return False
                 # Call output function if no tools were invoked
                 self.call_output_function(response)
                 return True
