@@ -62,3 +62,7 @@ You must respond in strictly valid JSON format with the following structure:
 
 AVAILABLE TOOLS:
 {tool_descriptions}"""
+
+
+EVENTS_FILE_PATH = "events.json"
+LISTS_FILE_PATH = "lists.json"
