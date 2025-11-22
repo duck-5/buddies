@@ -53,8 +53,12 @@ class WakeWordEngine:
         self.recognizer = KaldiRecognizer(self.model, self.sample_rate, vocab_list)
         
         logger.info(f"Engine ready. Wake phrase: '{self.wake_phrase}'")
-
+    
     def wait_for_activation(self, agent_flow: AgentFlow):
+        while True:
+            self.wait_for_activation_once(agent_flow)
+    
+    def wait_for_activation_once(self, agent_flow: AgentFlow):
         """
         Blocks execution and listens to the microphone until the wake phrase is spoken.
         
