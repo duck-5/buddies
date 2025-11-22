@@ -4,7 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-JSON_REGEX = "{.*}"
+JSON_REGEX = re.compile("\{.*\}", flags=re.DOTALL)
 
 def parse_llm_response(message):
     # Find json data in response
