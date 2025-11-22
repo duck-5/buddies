@@ -23,7 +23,7 @@ class AgentFlow:
     def main_flow(self):
         self.is_running = True
         should_continue = True
-        
+
         while should_continue:
             user_input = self.stt.listen_once()
             print("----> Input:", user_input)
@@ -43,7 +43,7 @@ class AgentFlow:
             system_prompt = self.parser.get_system_prompt()
             llm_response = self.llm_client.call(system_prompt, user_input)
 
-            if response == "<END>":
+            if llm_response == "<END>":
                 return False
             print("========\n", llm_response, "\n========")
             # Step 4: Parse and execute LLM output
