@@ -1,48 +1,38 @@
 import json
-
+from dataclasses import asdict
 import logging
 from typing import Any, Dict, List
 from agent.utils import utils
 from agent.tools.tool_interface import Tool
 from agent.tools import AVAILABLE_TOOLS, TOOLS_CONFIG
-from agent.agent_config import AGENT_CONFIG, LOGGING_CONFIG, ERROR_MESSAGES
+from agent.agent_config import LoggingConfig, ErrorMessages, ResponseTemplate
 
 # Configure Logging
 logging.basicConfig(
-    level=LOGGING_CONFIG["level"],
-    format=LOGGING_CONFIG["format"],
-    datefmt=LOGGING_CONFIG["datefmt"]
+    level=LoggingConfig.level,
+    format=LoggingConfig.format,
+    datefmt=LoggingConfig.datefmt
 )
 logger = logging.getLogger("AgentSystem")
 
 
 class Config:
     def __init__(self):
-        self._data = {
-            "agent": AGENT_CONFIG,
-            "tools": TOOLS_CONFIG,
-            "error_messages": ERROR_MESSAGES,
-        }
-
-    @property
-    def agent_section(self) -> Dict[str, Any]:
-        return self._data.get("agent", {})
-
-    @property
-    def plugins_dir(self) -> str:
-        return self.agent_section.get("plugins_directory", "plugins")
+        self._tools_config = TOOLS_CONFIG
+        self._error_messages = ErrorMessages()
+        self._response_template = ResponseTemplate
 
     @property
     def prompt_template(self) -> str:
-        return self.agent_section.get("system_prompt_template", "")
+        return self._response_template.system_prompt_template
 
     @property
     def tools_config(self) -> Dict[str, Any]:
-        return self._data.get("tools", {})
+        return self._tools_config
 
     @property
     def error_messages(self) -> Dict[str, str]:
-        return self._data.get("error_messages", {})
+        return asdict(self._error_messages)
 
     def get_error(self, key: str, **kwargs) -> str:
         msg = self.error_messages.get(key, "Unknown Error")
@@ -59,10 +49,7 @@ class AgentParser:
 
     @staticmethod
     def _get_tools(config):
-        tools: Dict[str, Tool] = {tool.NAME: tool() for tool in AVAILABLE_TOOLS}
-        for tool in tools.values():
-            tool.configure(config.tools_config.get(tool.NAME, {}))
-        return tools
+        return {tool.NAME: tool(config.tools_config.get(tool.NAME, {})) for tool in AVAILABLE_TOOLS}
         
     
     def _build_descriptions(self) -> str:
