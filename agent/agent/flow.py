@@ -51,6 +51,8 @@ class AgentFlow:
             if results:
                 user_input = "This is the tool usage report. Make sure that all tools were invoked properly, and after that respond to the user."
                 user_input += "\n" + json.dumps({"tool_results": results}, indent=2)
+                
+                print("********\n", user_input, "\n********")
             elif response:
                 # Call output function if no tools were invoked
                 self.call_output_function(response)
