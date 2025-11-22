@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, List, Any
+import toml
 
 # --- AGENT CONFIGURATION ---
 # --- LOGGING CONFIGURATION ---
@@ -46,9 +47,10 @@ class ResponseTemplate:
   tool_calls: List[ToolCall]
   
   system_prompt_template: str = """You are an AI agent capable of using tools.
-
+Note that sometimes the tools won't work. You must validate the tool_results section in responses and make sure that the statues is success.
+If not, understand the error and recall the tool.
 RESPONSE FORMAT:
-1. Your response must be in raw JSON format (beginning with {{ and ending with }}, no quotes around the JSON)
+1. Your response must always be in raw JSON format {{ and ending with }}. Never reply in any other format.
 2. The response must have the following structure:
 {{
   "thought": "Your reasoning process here",
@@ -66,3 +68,17 @@ AVAILABLE TOOLS:
 
 EVENTS_FILE_PATH = "events.json"
 LISTS_FILE_PATH = "lists.json"
+
+def load_google_api_key(secrets_file: str = "secrets.toml") -> str:
+    """Load the Google API key from the secrets.toml file."""
+    try:
+        with open(secrets_file, "r") as file:
+            secrets = toml.load(file)
+            return secrets.get("GOOGLE_API_KEY", "")
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Secrets file '{secrets_file}' not found.")
+    except Exception as e:
+        raise RuntimeError(f"Failed to load Google API key: {e}")
+
+# Example usage
+GOOGLE_API_KEY = load_google_api_key()

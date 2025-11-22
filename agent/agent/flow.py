@@ -1,6 +1,7 @@
 import json
 from typing import Any, Dict, List
-from agent.agent_system import AgentParser, Config
+from agent.parser import AgentParser, Config
+from agent.config import GOOGLE_API_KEY
 from agent.llm.gemini_client import GeminiClient, GeminiConfig
 
 class AgentFlow:
@@ -43,8 +44,8 @@ class AgentFlow:
                 self.return_results_to_llm(results)
             else:
                 # Call output function if no tools were invoked
+                print("========\n", llm_response, "\n========")
                 parsed_output = json.loads(llm_response)
-                print(parsed_output)
                 output_text = parsed_output.get("response", "")
                 self.call_output_function(output_text)
                 return
@@ -73,7 +74,7 @@ if __name__ == "__main__":
 
     # Initialize GeminiClient
     gemini_config = GeminiConfig(
-        api_key = "AIzaSyBMNdN7CRw619o7HKHJ-xlFcmREskGhbkk",
+        api_key = GOOGLE_API_KEY,
         chat_mode=True
     )
     

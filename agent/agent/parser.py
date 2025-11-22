@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from agent.utils import utils
 from agent.tools.tool_interface import Tool
 from agent.tools import AVAILABLE_TOOLS, TOOLS_CONFIG
-from agent.agent.config import LoggingConfig, ErrorMessages, ResponseTemplate
+from agent.config import LoggingConfig, ErrorMessages, ResponseTemplate
 
 # Configure Logging
 logging.basicConfig(

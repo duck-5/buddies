@@ -21,7 +21,7 @@ class RemoveEventTool(Tool):
             if not description:
                 raise "Error: 'description' is required."
 
-            file_path = self.config.get("events_file_path", "events.json")
+            file_path = self.config.events_file_path
 
             # Check if the file exists
             if not os.path.exists(file_path):
