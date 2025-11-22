@@ -22,7 +22,7 @@ class AgentFlow:
         """Main flow of the system."""
         while True:
             # Step 1: Get user input
-            user_input = self.listener.next()
+            user_input = self.listener.__next__()
             self.basic_flow(user_input)
     
     def basic_flow(self, user_input: str):
