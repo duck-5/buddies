@@ -2,6 +2,11 @@ from dataclasses import dataclass
 from typing import Dict, List, Any
 import toml
 
+# Profile:
+USER_NAME = "Idit"
+USER_AGE = 30
+USER_CITY = "Shoham"
+
 # --- AGENT CONFIGURATION ---
 # --- LOGGING CONFIGURATION ---
 @dataclass
@@ -39,17 +44,16 @@ class ErrorMessages:
 class ToolCall:
   tool_name: str
   arguments: Dict[str, Any]  
-    
-@dataclass
-class ResponseTemplate:
-  thought: str
-  response: str
-  tool_calls: List[ToolCall]
-  
-  system_prompt_template: str = """You are an AI agent capable of using tools.
-Note that sometimes the tools won't work. You must validate the tool_results section in responses and make sure that the statues is success.
-If not, understand the error and recall the tool.
-RESPONSE FORMAT:
+
+SYSTEM_PROMPT_PREFIX = f"""You are an AI agent made for helping adults.
+Your user name is {USER_NAME}, age is {USER_AGE}, and lives in {USER_CITY}.
+Use friendly, caring language and keep it concise (one or two sentences).
+You are capable of using tools.
+After using a tool, you will receive a results summery. Your response doesn't appear the user unless all tool usage was completed.
+The tool usage result summery has a status. If the status is 'success', all is well. If not, check what the issue is. You can try and recall the tool.
+Use the tools to comply with the user's requests.
+"""
+RESPONSE_FORMAT = """RESPONSE FORMAT:
 1. Your response must always be in raw JSON format {{ and ending with }}. Never reply in any other format.
 2. The response must have the following structure:
 {{
@@ -61,10 +65,19 @@ RESPONSE FORMAT:
       "arguments": {{ ... fields specific to the tool ... }}
     }}
   ]
-}}
+}}"""
 
-AVAILABLE TOOLS:
-{tool_descriptions}"""
+TOOLS_DESCRIPTION = """AVAILABLE TOOLS:
+{tool_descriptions}
+"""
+    
+@dataclass
+class ResponseTemplate:
+  thought: str
+  response: str
+  tool_calls: List[ToolCall]
+  
+  system_prompt_template: str = SYSTEM_PROMPT_PREFIX + RESPONSE_FORMAT + TOOLS_DESCRIPTION
 
 EVENTS_FILE_PATH = "events.json"
 LISTS_FILE_PATH = "lists.json"
