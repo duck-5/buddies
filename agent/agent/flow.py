@@ -40,16 +40,16 @@ class AgentFlow:
             system_prompt = self.parser.get_system_prompt()
             llm_response = self.llm_client.call(system_prompt, user_input)
 
+            print("========\n", llm_response, "\n========")
             # Step 4: Parse and execute LLM output
             thought, response, results = self.parser.parse_and_execute(llm_response)
-
+            
             # Step 5: Handle results
             if results:
                 self.notes += "Tools were invoked. The output hasn't passed to the user. Make sure that all tools were invoked properly, and then the output will be returned to the user."
                 self.return_results_to_llm(results)
             elif response:
                 # Call output function if no tools were invoked
-                print("========\n", llm_response, "\n========")
                 self.call_output_function(response)
                 return
 
