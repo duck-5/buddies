@@ -41,29 +41,20 @@ class AgentFlow:
 
             print("========\n", llm_response, "\n========")
             # Step 4: Parse and execute LLM output
-            thought, response, results = self.parser.parse_and_execute(llm_response)
+            try:
+                thought, response, results = self.parser.parse_and_execute(llm_response)
+            except Exception as e:
+                user_input = f"There was an error processing the previous response: {str(e)}. Please try again."
+                continue
             
             # Step 5: Handle results
             if results:
-                self.notes += "Tools were invoked. The output hasn't passed to the user. Make sure that all tools were invoked properly, and then the output will be returned to the user."
-                self.return_results_to_llm(results)
+                user_input = "This is the tool usage report. Make sure that all tools were invoked properly, and after that respond to the user."
+                user_input += "\n" + json.dumps({"tool_results": results}, indent=2)
             elif response:
                 # Call output function if no tools were invoked
                 self.call_output_function(response)
                 return
-
-    def return_results_to_llm(self, results: List[Dict[str, Any]]):
-        """Send tool execution results back to the LLM."""
-        try:
-            # Format the results as a JSON string
-            results_json = json.dumps({"tool_results": results}, indent=2)
-            print("Returning results to LLM:")
-            print(results_json)
-
-            # Optionally, you can send the results back to the LLM client if needed
-            # self.llm_client.send_results(results_json)
-        except Exception as e:
-            self.llm_client.logger.error(f"Failed to return results to LLM: {e}")
 
     def call_output_function(self, output_text: str):
         """Simulates calling an output function with the LLM's text."""
