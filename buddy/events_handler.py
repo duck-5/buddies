@@ -34,7 +34,7 @@ def check_and_alert_events(agent_flow: AgentFlow):
             if agent_flow.is_running:
                 agent_flow.add_note(f"You need to alert for the event: '{description}' at time {event.time}")
             else:
-                agent_flow.basic_flow(f"Alert me for the event '{description}' at time {event.time}")
+                agent_flow.basic_flow(f"system message: The user needs to be alerted for event '{description}' at time {event.time}. Do it now.")
         
             event.has_passed = True
     # Save updated events back to file
