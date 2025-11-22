@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List
 from agent.tools.tool_interface import Tool
 from agent.tools import AVAILABLE_TOOLS, TOOLS_CONFIG
-from agent.agent_config import AGENT_CONFIG, LOGGING_CONFIG, ERROR_MESSAGES
+from agent.agent_config import AGENT_CONFIG, LOGGING_CONFIG, ERROR_MESSAGES, SYSTEM_PROMPT_TEMPLATE
 
 # Configure Logging
 logging.basicConfig(
@@ -33,7 +33,7 @@ class Config:
 
     @property
     def prompt_template(self) -> str:
-        return self.agent_section.get("system_prompt_template", "")
+        return self.agent_section[SYSTEM_PROMPT_TEMPLATE]
 
     @property
     def tools_config(self) -> Dict[str, Any]:
@@ -94,6 +94,7 @@ class AgentParser:
                 logger.info(f"[AI Message]: {data['response']}")
 
             tool_calls = data.get("tool_calls", [])
+            
             for call in tool_calls:
                 tool_name = call.get("tool_name")
                 args_dict = call.get("arguments", {})

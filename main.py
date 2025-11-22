@@ -23,7 +23,7 @@ def main():
                 "tool_name": "add_to_list",
                 "arguments": {
                     "list_name": "groceries",
-                    "item": "2milk"
+                    "item": "pepper"
                 }
             }
         ]
