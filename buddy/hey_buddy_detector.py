@@ -1,89 +1,104 @@
 import os
-import sys
-import queue
 import json
+import sys
+import logging
 import pyaudio
+from agent.agent.flow import AgentFlow
 from vosk import Model, KaldiRecognizer
 
-# --- Configuration ---
-WAKE_PHRASE = "hey buddy"
-MODEL_PATH = "model"  # The folder name where you extracted the Vosk model
-DEVICE_INDEX = None   # Set to an integer (e.g., 0, 1) if you need a specific mic
+# Configure logging to look nice and clean
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%H:%M:%S"
+)
+logger = logging.getLogger(__name__)
 
-def main():
-    # 1. Check if model exists
-    if not os.path.exists(MODEL_PATH):
-        print(f"Please download a model from https://alphacephei.com/vosk/models")
-        print(f"Unpack it as '{MODEL_PATH}' in the current folder.")
-        sys.exit(1)
+class WakeWordEngine:
+    """
+    A dedicated engine for detecting specific wake phrases using Vosk.
+    """
 
-    # 2. Load the Model
-    print(f"Loading model from '{MODEL_PATH}'...")
-    print("This might take a few seconds on a Raspberry Pi...")
-    try:
-        model = Model(MODEL_PATH)
-    except Exception as e:
-        print(f"Failed to load model: {e}")
-        sys.exit(1)
+    def __init__(self, model_path: str, wake_phrase: str, device_index: int = None):
+        """
+        Initialize the engine. Loads the model once to save time later.
 
-    # 3. Create the recognizer
-    # IMPORTANT: The list in the 3rd argument restricts the vocabulary.
-    # This forces the engine to ONLY recognize "hey buddy" or unknown noise "[unk]".
-    # This significantly increases accuracy for this specific phrase.
-    rec = KaldiRecognizer(model, 16000, f'["{WAKE_PHRASE}", "[unk]"]')
+        Args:
+            model_path (str): Path to the Vosk model folder.
+            wake_phrase (str): The specific phrase to trigger on (e.g., "hey buddy").
+            device_index (int): Optional microphone device index.
+        """
+        self.wake_phrase = wake_phrase
+        self.device_index = device_index
+        self.sample_rate = 16000
+        
+        # 1. Validation
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(
+                f"Model not found at '{model_path}'. "
+                "Please download from https://alphacephei.com/vosk/models"
+            )
 
-    # 4. Setup Microphone
-    p = pyaudio.PyAudio()
-    
-    try:
-        # Try to open the default device
-        stream = p.open(format=pyaudio.paInt16,
-                        channels=1,
-                        rate=16000,
-                        input=True,
-                        frames_per_buffer=8000,
-                        input_device_index=DEVICE_INDEX)
-    except Exception as e:
-        print(f"Error opening microphone: {e}")
-        print("Try running 'audio_bar_visualizer.py' to find your device ID.")
-        sys.exit(1)
+        # 2. Load Model (The heavy operation)
+        logger.info(f"Loading model from '{model_path}'...")
+        try:
+            self.model = Model(model_path)
+        except Exception as e:
+            raise RuntimeError(f"Failed to load Vosk model: {e}")
 
-    print("-" * 50)
-    print(f"Listening for: '{WAKE_PHRASE}'")
-    print("Speak naturally. Press Ctrl+C to stop.")
-    print("-" * 50)
+        # 3. Configure Recognizer with restricted vocabulary
+        # The list ["phrase", "[unk]"] forces the AI to only care about the wake word
+        # or noise, significantly improving accuracy.
+        vocab_list = f'["{self.wake_phrase}", "[unk]"]'
+        self.recognizer = KaldiRecognizer(self.model, self.sample_rate, vocab_list)
+        
+        logger.info(f"Engine ready. Wake phrase: '{self.wake_phrase}'")
 
-    stream.start_stream()
+    def wait_for_activation(self, agent_flow: AgentFlow):
+        """
+        Blocks execution and listens to the microphone until the wake phrase is spoken.
+        
+        Returns:
+            bool: True when wake word is detected.
+        """
+        p = pyaudio.PyAudio()
+        stream = None
 
-    try:
-        while True:
-            # Read data from microphone
-            data = stream.read(4000, exception_on_overflow=False)
+        try:
+            stream = p.open(format=pyaudio.paInt16,
+                            channels=1,
+                            rate=self.sample_rate,
+                            input=True,
+                            frames_per_buffer=8000,
+                            input_device_index=self.device_index)
             
-            if len(data) == 0:
-                break
-            
-            # Feed data to the recognizer
-            if rec.AcceptWaveform(data):
-                # We get a full result
-                result_json = json.loads(rec.Result())
-                text = result_json.get('text', '')
+            logger.info("Listening... (Press Ctrl+C to stop)")
+            stream.start_stream()
+
+            while True:
+                data = stream.read(4000, exception_on_overflow=False)
                 
-                if text == WAKE_PHRASE:
-                    print(f"✅ WAKE WORD DETECTED: {text.upper()}")
-                    # Add your trigger code here (e.g., turn on LED, play sound)
-            else:
-                # Partial result (usually not needed for wake words, but good for debugging)
-                # partial = json.loads(rec.PartialResult())
-                pass
+                if len(data) == 0:
+                    break
 
-    except KeyboardInterrupt:
-        print("\nStopped by user.")
-    finally:
-        print("Cleaning up...")
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
+                if self.recognizer.AcceptWaveform(data):
+                    result = json.loads(self.recognizer.Result())
+                    text = result.get('text', '')
 
-if __name__ == "__main__":
-    main()
+                    if text == self.wake_phrase:
+                        logger.info(f"✅ Wake word detected: {text.upper()}")
+                        AgentFlow.main_flow()
+                        return True
+
+        except KeyboardInterrupt:
+            logger.info("Stopping listener...")
+            return False
+        except Exception as e:
+            logger.error(f"Audio stream error: {e}")
+            return False
+        finally:
+            # Clean resource management
+            if stream:
+                stream.stop_stream()
+                stream.close()
+            p.terminate()
