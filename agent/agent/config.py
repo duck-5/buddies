@@ -105,5 +105,5 @@ def load_google_api_key(secrets_file: str = "secrets.toml") -> str:
 GOOGLE_API_KEY = load_google_api_key()
 RESOURCES_PATH = "/home/user/buddies/resources/"
 ONNX_PATH = f"{RESOURCES_PATH}/en_US-lessac-medium.onnx"
-HEY_BUDDY_VOSK_MODEL_PATH = f"{RESOURCES_PATH}/model"
+HEY_BUDDY_VOSK_MODEL_PATH = f"{RESOURCES_PATH}/vosk-model-small-en-us-0.15"
 MAIN_STT_VOSK_MODEL_PATH = f"{RESOURCES_PATH}/vosk-model-en-us-0.22-lgraph"
