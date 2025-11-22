@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from agent.utils import utils
 from agent.tools.tool_interface import Tool
 from agent.tools import AVAILABLE_TOOLS, TOOLS_CONFIG
-from agent.agent_config import LoggingConfig, ErrorMessages, ResponseTemplate
+from agent.config import LoggingConfig, ErrorMessages, ResponseTemplate
 
 # Configure Logging
 logging.basicConfig(
@@ -68,7 +68,6 @@ class AgentParser:
         )
 
     def parse_and_execute(self, llm_response: str) -> List[Dict[str, Any]]:
-
         try:
             data = utils.parse_llm_response(llm_response)
         except ValueError:
@@ -79,6 +78,7 @@ class AgentParser:
         results = []
         if "thought" in data:
             logger.info(f"[AI Thought]: {data['thought']}")
+        
         if "response" in data:
             logger.info(f"[AI Message]: {data['response']}")
 
@@ -102,4 +102,4 @@ class AgentParser:
                 results.append({"tool": tool_name, "status": "error", "output": err_msg})
                 logger.error(err_msg)
 
-        return results
+        return data.get("thought", ""), data.get("response", ""), results

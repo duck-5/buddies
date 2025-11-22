@@ -13,105 +13,110 @@ from agent.llm.llm_client import LLMClient
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("IO.GeminiClient")
 
+from dataclasses import dataclass, field
+from typing import Optional
+
+@dataclass
+class GeminiConfig:
+    """Configuration for the Gemini Client."""
+    api_key: str
+    model_name: str = "models/gemini-2.5-flash"
+    chat_mode: bool = False
+    temperature: float = 0.7
+    max_output_tokens: Optional[int] = None
+
 
 class GeminiClient(LLMClient):
     """
-    Google Gemini implementation of LLMClient.
-    
-    Communicates with Google's Gemini API using the google-generativeai library.
+    Google Gemini implementation of LLMClient using a Dataclass configuration.
     """
-    
-    DEFAULT_MODEL = "models/gemini-2.5-flash"
-    
-    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
+
+    def __init__(self, config: GeminiConfig) -> None:
         """
         Initialize the Gemini client.
-        
-        Args:
-            config: Configuration dictionary. Required keys:
-                   - "api_key": Google API key for authentication
-                   Optional keys:
-                   - "model_name": Model to use (default: "models/gemini-2.0-flash-exp")
-                   Note: Tools support is currently disabled.
-        
-        Raises:
-            ImportError: If google-generativeai is not installed.
-            ValueError: If api_key is not provided in config.
-        """
-        super().__init__(config)
 
-        
-        api_key = self.config.get("api_key")
-        if not api_key:
-            raise ValueError("'api_key' is required in config for GeminiClient")
-        
-        # Configure the API
-        genai.configure(api_key=api_key)
-        
-        # Get model name from config
-        self.model_name = self.config.get("model_name", self.DEFAULT_MODEL)        # Tools support is disabled - always use empty list
-        
-        logger.info(f"Initialized GeminiClient with model: {self.model_name}")
-    
+        Args:
+            config: A GeminiConfig object containing api_key, model_name, etc.
+        """
+        # We store the specific config object
+        self.config = config
+        self.chat_session = None
+
+        # Validate critical fields
+        if not self.config.api_key:
+            raise ValueError("GeminiConfig.api_key is required.")
+
+        # Configure the global genai library
+        # Note: In a multi-client setup, you might need to handle this differently
+        genai.configure(api_key=self.config.api_key)
+
+        logger.info(
+            f"Initialized GeminiClient with model: {self.config.model_name}, "
+            f"Chat Mode: {self.config.chat_mode}"
+        )
+
     def call(self, system_prompt: str, user_message: str) -> str:
         """
-        Send a request to Gemini and return the response.
-        
-        Args:
-            system_prompt: The system prompt containing instructions and
-                          tool descriptions for the LLM.
-            user_message: The user's message or query to process.
-        
-        Returns:
-            The raw response from Gemini as a string. Expected to be
-            valid JSON matching the agent protocol format.
-        
-        Raises:
-            Exception: For API errors, network errors, or other failures.
+        Send a request to Gemini.
         """
         try:
-            # Recreate model with the system prompt (system_instruction)
-            # Note: We recreate it each time in case the system prompt changes
-            model = genai.GenerativeModel(
-                model_name=self.model_name,
-                system_instruction=system_prompt)
+            # --- CHAT MODE (Stateful) ---
+            if self.config.chat_mode:
+                if self.chat_session is None:
+                    logger.debug("Starting new chat session with system prompt.")
+                    model = self._create_model(system_prompt)
+                    self.chat_session = model.start_chat(history=[])
+                
+                response = self.chat_session.send_message(user_message)
 
-            logger.debug(f"Sending request to Gemini (model: {self.model_name})")
-            logger.debug(f"System prompt: {system_prompt}")
-            logger.debug(f"User message: {user_message}")
-            
-            # Generate content
-            response = model.generate_content(user_message)            
+            # --- STANDARD MODE (Stateless) ---
+            else:
+                # Create a fresh model for every call
+                model = self._create_model(system_prompt)
+                response = model.generate_content(user_message)
+
             if not response.text:
-                raise RuntimeError("No response from gemini")
+                raise RuntimeError("No response text received from Gemini.")
 
-            logger.debug(f"Received response from Gemini (length: {len(response.text)} characters)")
-            logger.debug(f"Full Gemini response: {response.text}")
-            
             return response.text
-            
+
         except Exception as e:
             logger.error(f"Error calling Gemini API: {e}")
             raise
-    
-    def configure(self, config: Dict[str, Any]) -> None:
+
+    def _create_model(self, system_instruction: str) -> genai.GenerativeModel:
+        """Helper to create the model object based on current config."""
+        generation_config = genai.types.GenerationConfig(
+            temperature=self.config.temperature,
+            max_output_tokens=self.config.max_output_tokens
+        )
+        
+        return genai.GenerativeModel(
+            model_name=self.config.model_name,
+            system_instruction=system_instruction,
+            generation_config=generation_config
+        )
+
+    def update_config(self, new_config: GeminiConfig) -> None:
         """
-        Update the client configuration.
-        
-        Note: If api_key or model_name changes, the client will need to be
-        reinitialized. This method only updates the config dictionary.
-        
-        Args:
-            config: Configuration dictionary to merge with existing config.
+        Replaces the current configuration with a new one.
+        Resets the chat session if model or critical settings change.
         """
-        super().configure(config)
+        # Check if we need to reset the chat session
+        reset_needed = (
+            new_config.model_name != self.config.model_name or
+            new_config.chat_mode != self.config.chat_mode or
+            new_config.system_prompt_hash != getattr(self.config, 'system_prompt_hash', None) # Advanced usage
+        )
         
-        # If api_key changed, reconfigure
-        if "api_key" in config:
-            genai.configure(api_key=config["api_key"])
-            logger.info("Updated Gemini API key")
+        # Re-authenticate if key changed
+        if new_config.api_key != self.config.api_key:
+             genai.configure(api_key=new_config.api_key)
+
+        self.config = new_config
         
-        # If model_name changed, update it
-        if "model_name" in config:
-            self.model_name = config["model_name"]
-            logger.info(f"Updated model name to: {self.model_name}")
+        if reset_needed:
+            self.chat_session = None
+            logger.info("Configuration updated: Chat session reset.")
+        else:
+            logger.info("Configuration updated.")
