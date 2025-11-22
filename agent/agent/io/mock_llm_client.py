@@ -13,6 +13,19 @@ from agent.io.llm_client import LLMClient
 logger = logging.getLogger("IO.MockLLMClient")
 
 
+DEFAULT_MOCK_RESPONSE = """{
+    "thought": "Adding milk using defaults.",
+    "tool_calls": [
+        {
+            "tool_name": "add_to_list",
+            "arguments": {
+                "list_name": "groceries",
+                "item": "milk"
+            }
+        }
+    ]
+}"""
+
 class MockLLMClient(LLMClient):
     """
     Mock implementation of LLMClient that returns hardcoded responses.

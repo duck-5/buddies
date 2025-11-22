@@ -1,5 +1,9 @@
-from agent.agent_system import Config, logger, AgentParser
-from agent.io import MockLLMClient
+import logging
+import logging.config
+from agent.agent_system import Config, AgentParser
+from agent.io import GeminiClient
+
+logger = logging.getLogger(__name__)
 
 def main():
     try:
@@ -15,25 +19,12 @@ def main():
     logger.info("System initialized. Generating system prompt...")
     system_prompt = parser.get_system_prompt()
 
-    # Initialize mock LLM client with the existing mock response
-    mock_response = """
-    {
-        "thought": "Adding milk using defaults.",
-        "tool_calls": [
-            {
-                "tool_name": "add_to_list",
-                "arguments": {
-                    "list_name": "groceries",
-                    "item": "2milk"
-                }
-            }
-        ]
-    }
-    """
-    llm_client = MockLLMClient(config={"response": mock_response.strip()})
+
+    API_KEY = "AIzaSyBMNdN7CRw619o7HKHJ-xlFcmREskGhbkk"
+    llm_client = GeminiClient(config={"api_key": API_KEY})
     
     # Simulate user message
-    user_message = "Add milk to my groceries list"
+    user_message = "I ran out of milk"
     
     logger.info("Calling LLM...")
     llm_response = llm_client.call(system_prompt, user_message)
