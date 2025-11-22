@@ -87,7 +87,7 @@ class WakeWordEngine:
 
                     if text == self.wake_phrase:
                         logger.info(f"✅ Wake word detected: {text.upper()}")
-                        AgentFlow.main_flow()
+                        agent_flow.main_flow()
                         return True
 
         except KeyboardInterrupt:
