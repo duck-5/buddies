@@ -1,68 +1,24 @@
-
-from agent.agent_system import Config, logger, AgentParser
-
-import logging
-from agent.agent_system import Config, AgentParser
-from agent.llm import GeminiClient
-
-logger = logging.getLogger(__name__)
-
-
-def main():
-    try:
-        config = Config()
-    except FileNotFoundError:
-        logger.critical("Configuration file 'agent_config.toml' not found.")
-        return
-
-    parser = AgentParser(config)
-    
-    logger.info("System initialized. Generating system prompt...")
-    system_prompt = parser.get_system_prompt()
-
-
-
-    # Simulate LLM output
-    mock_response = """
-    {
-        "thought": "Adding milk using defaults.",
-        "tool_calls": [
-            {
-                "tool_name": "add_to_list",
-                "arguments": {
-                    "list_name": "invite_list",
-                    "item": "Not Dikla"
-                }
-            },
-            {
-                "tool_name": "add_event",
-                "arguments": {
-                    "time": "10/10/2024 10:00",
-                    "description": "Doctor's appointment",
-                    "importance": "1",
-                    "notification": true
-                    
-                }
-            }
-        ]
-    }
-    """
-
-    API_KEY = "AIzaSyBMNdN7CRw619o7HKHJ-xlFcmREskGhbkk"
-    llm_client = GeminiClient(config={"api_key": API_KEY})
-    
-    # Simulate user message
-    user_message = "I ran out of milk. Also, wake me up in 1 hour."
-    
-    logger.info("Calling LLM...")
-    llm_response = llm_client.call(system_prompt, user_message)
-    
-    logger.info("Processing LLM response...")
-    results = parser.parse_and_execute(llm_response)
-    
-    logger.info("Execution Results:")
-    for res in results:
-        logger.info(res)
+from agent.agent.parser import AgentParser, Config
+from agent.agent.config import GOOGLE_API_KEY
+from agent.agent.flow import AgentFlow
+from agent.agent.llm.gemini_client import GeminiClient, GeminiConfig
+from threading import Thread
+from buddy.events_handler import pool_events_handler
 
 if __name__ == "__main__":
-    main()
+    # Initialize configuration and parser
+    config = Config()
+    parser = AgentParser(config)
+
+    # Initialize GeminiClient
+    gemini_config = GeminiConfig(
+        api_key = GOOGLE_API_KEY,
+        chat_mode=True
+    )
+    
+    llm_client = GeminiClient(gemini_config)
+
+    # Create and run the agent flow
+    agent_flow = AgentFlow(parser, llm_client)
+    Thread(target=agent_flow.main_flow).start()
+    Thread(target=pool_events_handler, args=(agent_flow,)).start()
