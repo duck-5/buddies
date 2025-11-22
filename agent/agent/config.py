@@ -47,7 +47,6 @@ class ToolCall:
   arguments: Dict[str, Any]  
 
 CURRENT_DATETIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
 SYSTEM_PROMPT_PREFIX = f"""You are an AI agent made for helping adults.
 Your user name is {USER_NAME}, age is {USER_AGE}, and lives in {USER_CITY}.
 The current date and time is {CURRENT_DATETIME}.
@@ -57,6 +56,7 @@ After using a tool, you will receive a results summery. Your response doesn't ap
 The tool usage result summery has a status. If the status is 'success', all is well. If not, check what the issue is. You can try and recall the tool.
 Use the tools to comply with the user's requests.
 Remember to always respond in the requested format. All responses that aren't in the format are not helpful.
+If you are requested to alert for an event, include that in the conversation. Never ignore it!
 """
 RESPONSE_FORMAT = """RESPONSE FORMAT:
 1. Your response must always be in raw JSON format {{ and ending with }}. Never reply in any other format.
@@ -64,13 +64,17 @@ RESPONSE_FORMAT = """RESPONSE FORMAT:
 {{
   "thought": "Your reasoning process here",
   "response": "Text response to the user (optional if using tools)",
+  "end": if this field is present with value 1, the conversation will be ended.
   "tool_calls": [
     {{
       "tool_name": "name_of_tool",
       "arguments": {{ ... fields specific to the tool ... }}
     }}
   ]
-}}"""
+}}
+"""
+
+
 
 TOOLS_DESCRIPTION = """AVAILABLE TOOLS:
 {tool_descriptions}

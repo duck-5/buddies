@@ -102,4 +102,4 @@ class AgentParser:
                 results.append({"tool": tool_name, "status": "error", "output": err_msg})
                 logger.error(err_msg)
 
-        return data.get("thought", ""), data.get("response", ""), results
+        return data.get("thought", ""), data.get("response", ""), data.get("end", ""), results

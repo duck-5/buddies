@@ -31,8 +31,10 @@ def check_and_alert_events(agent_flow: AgentFlow):
         # Check if the event needs to be alerted
         if notification and current_time >= event_time and not event.has_passed:
             print(f"ALERT: Event '{description}' is happening now or has passed!")
-            agent_flow.add_note(f"ALERT: Event '{description}' at time {event.time} is happening now or has passed!")
-            ... # Additional alert handling logic can be added here
+            if agent_flow.is_running:
+                agent_flow.add_note(f"You need to alert for the event: '{description}' at time {event.time}")
+            else:
+                agent_flow.basic_flow(f"system message: The user needs to be alerted for event '{description}' at time {event.time}. Do it now.")
         
             event.has_passed = True
     # Save updated events back to file

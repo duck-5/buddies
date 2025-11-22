@@ -14,18 +14,22 @@ class AgentFlow:
         self.llm_client = llm_client
         self.notes: List[str] = []
         self.stt = SpeechToText(model_path=VOSK_MODEL_PATH)
+        self.is_running: bool = False
 
     def add_note(self, note: str):
         """Add a special note to the list of notes."""
         self.notes.append(note)
 
     def main_flow(self):
-        """Main flow of the system."""
-        while True:
-            # Step 1: Get user input
+        self.is_running = True
+        should_continue = True
+
+        while should_continue:
             user_input = self.stt.listen_once()
             print("----> Input:", user_input)
-            self.basic_flow(user_input)
+            should_continue = self.basic_flow(user_input)
+
+        self.is_running = False
     
     def basic_flow(self, user_input: str):
         while True:
@@ -42,7 +46,7 @@ class AgentFlow:
             print("========\n", llm_response, "\n========")
             # Step 4: Parse and execute LLM output
             try:
-                thought, response, results = self.parser.parse_and_execute(llm_response)
+                thought, response, should_end, results = self.parser.parse_and_execute(llm_response)
             except Exception as e:
                 user_input = f"There was an error processing the previous response: {str(e)}. Please provide the same message exactly, in the correct format"
                 continue
@@ -56,7 +60,9 @@ class AgentFlow:
             elif response:
                 # Call output function if no tools were invoked
                 self.call_output_function(response)
-                return
+                if should_end:
+                    return False
+                return True
 
     def call_output_function(self, output_text: str):
         """Simulates calling an output function with the LLM's text."""
