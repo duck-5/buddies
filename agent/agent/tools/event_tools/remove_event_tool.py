@@ -1,7 +1,12 @@
+from dataclasses import dataclass
 import json
 import os
 from typing import Any, Dict
 from agent.tools.tool_interface import Tool
+
+@dataclass
+class RemoveEventToolConfig:
+    events_file_path: str
 
 class RemoveEventTool(Tool):
     NAME="remove_event"

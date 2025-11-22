@@ -7,8 +7,6 @@ def main():
         logger.critical("Configuration file 'agent_config.toml' not found.")
         return
 
-    logger.info(f"Scanning for tools in '{config.plugins_dir}'...")
-    
     parser = AgentParser(config)
     
     logger.info("System initialized. Generating system prompt...")
@@ -22,8 +20,18 @@ def main():
             {
                 "tool_name": "add_to_list",
                 "arguments": {
-                    "list_name": "groceries",
-                    "item": "pepper"
+                    "list_name": "invite_list",
+                    "item": "Not Dikla"
+                }
+            },
+            {
+                "tool_name": "add_event",
+                "arguments": {
+                    "time": "10/10/2024 10:00",
+                    "description": "Doctor's appointment",
+                    "importance": "1",
+                    "notification": true
+                    
                 }
             }
         ]

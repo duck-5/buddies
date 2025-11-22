@@ -1,24 +1,33 @@
+from dataclasses import dataclass
 import json
 import os
 import logging
 from typing import Any, Dict, List
 
-from agent.tools.list_tools.file_based_list_tool import FileBasedListTool
+from agent.tools.list_tools.file_based_list_tool import FileBasedListTool, FileBasedListToolConfig
 
 logger = logging.getLogger("Tools.ListAddItem")
+
+@dataclass
+class ListAddToolConfig(FileBasedListToolConfig):
+    default_list_name: str
+    max_list_size: int
 
 class ListAddTool(FileBasedListTool):
     NAME = "add_to_list"
     DESCRIPTION = "Adds a specific item to a named list."
     INPUT_FORMAT = '{"item": "str", "list_name": "str (optional)"}'
 
+    def __init__(self, config: ListAddToolConfig) -> None:
+        super().__init__(config)
+    
     def execute(self, arguments_json: str) -> Any:
         try:
             args = json.loads(arguments_json)
             
             # Config
-            default_list = self.config.get("default_list_name", "inbox")
-            max_size = self.config.get("max_list_size", 100)
+            default_list = self.config.default_list_name
+            max_size = self.config.max_list_size
             
             item = args.get("item")
             list_name = args.get("list_name", default_list)

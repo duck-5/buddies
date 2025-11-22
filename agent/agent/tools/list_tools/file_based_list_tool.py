@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import json
 import os
 import logging
@@ -6,11 +7,17 @@ from agent.tools.tool_interface import Tool
 
 logger = logging.getLogger("Tools.Lists")
 
+@dataclass
+class FileBasedListToolConfig:
+    list_file_path: str
+
 class FileBasedListTool(Tool):
     """Base class for list tools dealing with file I/O."""
-    
+    def __init__(self, config: FileBasedListToolConfig) -> None:
+        super().__init__(config)
+        
     def _get_file_path(self) -> str:
-        return self.config["list_file_path"]
+        return self.config.list_file_path
 
     def _load_data(self) -> Dict[str, List[str]]:
         path = self._get_file_path()

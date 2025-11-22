@@ -1,27 +1,56 @@
-# Configuration for the Agent System
+from dataclasses import dataclass
+from typing import Dict, List, Any
 
-# String constants for keys
-PLUGINS_DIRECTORY = "plugins_directory"
-SYSTEM_PROMPT_TEMPLATE = "system_prompt_template"
-LEVEL = "level"
-FORMAT = "format"
-DATEFMT = "datefmt"
-KEY_THOUGHT = "key_thought"
-KEY_RESPONSE = "key_response"
-KEY_TOOL_CALLS = "key_tool_calls"
-KEY_TOOL_NAME = "key_tool_name"
-KEY_ARGUMENTS = "key_arguments"
-JSON_PARSE = "json_parse"
-TOOL_NOT_FOUND = "tool_not_found"
-EXECUTION_ERROR = "execution_error"
-AGENT_CONFIG = {
-    PLUGINS_DIRECTORY: "plugins",
-    SYSTEM_PROMPT_TEMPLATE: """You are an AI agent capable of using tools.
+# --- AGENT CONFIGURATION ---
+# --- LOGGING CONFIGURATION ---
+@dataclass
+class LoggingConfig:
+    """Configuration for the system logging."""
+    # Actual values inserted
+    level: str = "INFO"
+    format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: str = "%H:%M:%S"
+
+
+# --- PROTOCOL CONFIGURATION ---
+@dataclass
+class ProtocolConfig:
+    """Defines the expected keys in the Agent's structured JSON response."""
+    # Actual values inserted
+    key_thought: str = "thought"
+    key_response: str = "response"
+    key_tool_calls: str = "tool_calls"
+    key_tool_name: str = "tool_name"
+    key_arguments: str = "arguments"
+
+# --- ERROR MESSAGES ---
+@dataclass
+class ErrorMessages:
+    """Templated error messages for various failure modes."""
+    # Actual values inserted
+    json_parse: str = "CRITICAL: Failed to parse JSON response. Error: {error}"
+    tool_not_found: str = "ERROR: Tool '{tool_name}' is not available."
+    execution_error: str = "ERROR: Tool '{tool_name}' failed during execution. Details: {error}"
+
+  
+  
+@dataclass
+class ToolCall:
+  tool_name: str
+  arguments: Dict[str, Any]  
+    
+@dataclass
+class ResponseTemplate:
+  thought: str
+  response: str
+  tool_calls: List[ToolCall]
+  
+  system_prompt_template: str = """You are an AI agent capable of using tools.
 
 RESPONSE FORMAT:
 You must respond in strictly valid JSON format with the following structure:
 {
-  \"thought": "Your reasoning process here",
+  "thought": "Your reasoning process here",
   "response": "Text response to the user (optional if using tools)",
   "tool_calls": [
     {
@@ -32,25 +61,4 @@ You must respond in strictly valid JSON format with the following structure:
 }
 
 AVAILABLE TOOLS:
-{tool_descriptions}""",
-}
-
-LOGGING_CONFIG = {
-    "level": "INFO",
-    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    "datefmt": "%H:%M:%S",
-}
-
-PROTOCOL_CONFIG = {
-    "key_thought": "thought",
-    "key_response": "response",
-    "key_tool_calls": "tool_calls",
-    "key_tool_name": "tool_name",
-    "key_arguments": "arguments",
-}
-
-ERROR_MESSAGES = {
-    "json_parse": "CRITICAL: Failed to parse JSON response. Error: {error}",
-    "tool_not_found": "ERROR: Tool '{tool_name}' is not available.",
-    "execution_error": "ERROR: Tool '{tool_name}' failed during execution. Details: {error}",
-}
+{tool_descriptions}"""

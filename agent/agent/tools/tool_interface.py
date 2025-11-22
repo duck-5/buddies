@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any, Dict
 
 
@@ -10,15 +11,9 @@ class Tool(ABC):
     INPUT_FORMAT: str
     DESCRIPTION: str
        
-    def __init__(self) -> None:
-        self.config: Dict[str, Any] = {}
-
-    def configure(self, config: Dict[str, Any]) -> None:
-        """
-        Injects tool-specific configuration from the TOML file.
-        """
+    def __init__(self, config) -> None:
         self.config = config
-
+    
     @abstractmethod
     def execute(self, arguments_json: str) -> Any:
         """
