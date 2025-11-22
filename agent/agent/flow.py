@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from agent.parser import AgentParser, Config
 from agent.config import GOOGLE_API_KEY
 from agent.llm.gemini_client import GeminiClient, GeminiConfig
-
+from agent.speech.stt import SpeechToText
 class AgentFlow:
     """Main flow of the system encapsulated in a class."""
 
@@ -11,6 +11,8 @@ class AgentFlow:
         self.parser = parser
         self.llm_client = llm_client
         self.notes: List[str] = []
+        stt = SpeechToText()
+        self.listener = stt.listen()
 
     def add_note(self, note: str):
         """Add a special note to the list of notes."""
@@ -20,7 +22,7 @@ class AgentFlow:
         """Main flow of the system."""
         while True:
             # Step 1: Get user input
-            user_input = input("Enter your input: ")
+            user_input = self.listener.next()
             self.basic_flow(user_input)
     
     def basic_flow(self, user_input: str):
