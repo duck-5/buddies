@@ -2,17 +2,13 @@ from piper import PiperVoice
 import sounddevice as sd
 import numpy as np
 import logging
-import logging.config
+from config import ONNX_PATH
 
 logger = logging.getLogger(__name__)
 logging.basicConfig()
 logger.setLevel(logging.DEBUG)
 
-RESOURCES_PATH = "/home/user/buddies/resources/"
-ONNX_PATH = f"{RESOURCES_PATH}/en_US-lessac-medium.onnx"
-
 voice = PiperVoice.load(ONNX_PATH)
-
 
 def talk(message):
     logger.info(f"Talking message: {message}")
